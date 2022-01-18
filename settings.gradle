@@ -1,0 +1,4 @@
+rootProject.name = "XNPlayer"
+include ':app'
+include ':ijkplayer-java'
+include ':lib-player'
