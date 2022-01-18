@@ -131,7 +131,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="200dp">
 
-                <com.noboauto.applet.video.media.XNBasicStd
+                <com.noboauto.applet.video.media.XnvdStdSpeed
                     android:id="@+id/std_video"
                     android:layout_width="match_parent"
                     android:layout_height="200dp" />

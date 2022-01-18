@@ -14,9 +14,8 @@ import com.bumptech.glide.Glide;
 import com.noboauto.applet.audio.IPlayerListener;
 import com.noboauto.applet.audio.PlayManager;
 import com.noboauto.applet.audio.TimeUtil;
-import com.noboauto.applet.video.media.XNBasicStd;
-import com.noboauto.applet.video.media.XNMediaExo;
 import com.noboauto.applet.video.media.XNMediaSystem;
+import com.noboauto.applet.video.media.XnvdStdSpeed;
 import com.noboauto.applet.video.vd.XnvdStd;
 
 
@@ -32,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button mFastforward;
     private Button mRewind;
     private TextView mStatus;
-    private XNBasicStd mXnBasicStd;
+    private XnvdStdSpeed mXnBasicStd;
     private static final String TAG = MainActivity.class.getSimpleName();
 
     @Override

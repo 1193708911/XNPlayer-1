@@ -22,6 +22,7 @@ public class VideoContext {
 
     /**
      * 退出小窗，该方法可在任意页面调用
+     *
      */
     void exitPictureInPicture() {
 
