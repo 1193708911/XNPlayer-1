@@ -20,7 +20,6 @@ import com.noboauto.applet.video.vd.XnvdStd;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-
     private TextView mTimer;
     private SeekBar mSeekbar;
     private TextView mEndTime;
