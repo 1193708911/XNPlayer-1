@@ -16,6 +16,7 @@ import com.noboauto.applet.audio.PlayManager;
 import com.noboauto.applet.audio.TimeUtil;
 import com.noboauto.applet.video.media.XNBasicStd;
 import com.noboauto.applet.video.media.XNMediaExo;
+import com.noboauto.applet.video.media.XNMediaSystem;
 import com.noboauto.applet.video.vd.XnvdStd;
 
 
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initVideo() {
         mXnBasicStd.setUp("http://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4"
-                , "开始行动", XnvdStd.SCREEN_NORMAL, XNMediaExo.class);
+                , "开始行动", XnvdStd.SCREEN_NORMAL, XNMediaSystem.class);
         Glide.with(this)
                 .load("")
                 .into(mXnBasicStd.posterImageView);

@@ -840,6 +840,7 @@ public abstract class Xnvd extends FrameLayout implements View.OnClickListener, 
         }
         if (position != 0) currentTimeTextView.setText(XNUtils.stringForTime(position));
         totalTimeTextView.setText(XNUtils.stringForTime(duration));
+        Log.e(TAG, "onProgress: "+ XNUtils.stringForTime(duration));
     }
 
     public void setBufferProgress(int bufferProgress) {

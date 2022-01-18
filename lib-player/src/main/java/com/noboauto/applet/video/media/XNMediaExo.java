@@ -3,7 +3,6 @@ package com.noboauto.applet.video.media;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.util.Log;
 import android.view.Surface;
 
@@ -29,6 +28,7 @@ import com.google.android.exoplayer2.video.VideoSize;
 import com.noboauto.applet.video.extension.XNMediaInterface;
 import com.noboauto.applet.video.vd.Xnvd;
 
+
 import cn.xnvd.R;
 
 public class XNMediaExo extends XNMediaInterface implements Player.Listener {
@@ -50,56 +50,50 @@ public class XNMediaExo extends XNMediaInterface implements Player.Listener {
     public void prepare() {
         Log.e(TAG, "prepare");
         Context context = jzvd.getContext();
-
         release();
-        mMediaHandlerThread = new HandlerThread("JZVD");
-        mMediaHandlerThread.start();
-        mMediaHandler = new Handler(mMediaHandlerThread.getLooper());//主线程还是非主线程，就在这里
         handler = new Handler();
-        mMediaHandler.post(() -> {
-            // 创建带宽
-            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter.Builder(context).build();
-            // 创建轨道选择工厂 视频每一这的画面如何渲染,实现默认的实现类
-            RenderersFactory videoTrackSelectionFactory = new DefaultRenderersFactory(context);
-            // 创建轨道选择实例 视频的音视频轨道如何加载,使用默认的轨道选择器
-            TrackSelector trackSelector = new DefaultTrackSelector(context);
-            // 创建播放器实例
-            player = new ExoPlayer.Builder(context, videoTrackSelectionFactory)
-                    .setBandwidthMeter(bandwidthMeter)
-                    .setTrackSelector(trackSelector)
-                    .build();
+        // 创建带宽
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter.Builder(context).build();
+        // 创建轨道选择工厂 视频每一这的画面如何渲染,实现默认的实现类
+        RenderersFactory videoTrackSelectionFactory = new DefaultRenderersFactory(context);
+        // 创建轨道选择实例 视频的音视频轨道如何加载,使用默认的轨道选择器
+        TrackSelector trackSelector = new DefaultTrackSelector(context);
+        // 创建播放器实例
+        player = new ExoPlayer.Builder(context, videoTrackSelectionFactory)
+                .setBandwidthMeter(bandwidthMeter)
+                .setTrackSelector(trackSelector)
+                .build();
 
-            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
-                    Util.getUserAgent(context, context.getResources().getString(R.string.app_name)));
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
+                Util.getUserAgent(context, context.getResources().getString(R.string.app_name)));
 
-            String currUrl = jzvd.jzDataSource.getCurrentUrl().toString();
-            MediaSource videoSource;
-            if (currUrl.contains(".m3u8")) {
-                videoSource = new DashMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(MediaItem.fromUri(currUrl));
-            } else {
-                videoSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(MediaItem.fromUri(currUrl));
+        String currUrl = jzvd.jzDataSource.getCurrentUrl().toString();
+        MediaSource videoSource;
+        if (currUrl.contains(".m3u8")) {
+            videoSource = new DashMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(currUrl));
+        } else {
+            videoSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(currUrl));
+        }
+        player.addListener(this);
+
+        Boolean isLoop = jzvd.jzDataSource.looping;
+        if (isLoop) {
+            player.setRepeatMode(Player.REPEAT_MODE_ONE);
+        } else {
+            player.setRepeatMode(Player.REPEAT_MODE_OFF);
+        }
+        player.setMediaSource(videoSource);
+        player.prepare();
+        player.setPlayWhenReady(true);
+        callback = new onBufferingUpdate();
+        if (jzvd.textureView != null) {
+            SurfaceTexture surfaceTexture = jzvd.textureView.getSurfaceTexture();
+            if (surfaceTexture != null) {
+                player.setVideoSurface(new Surface(surfaceTexture));
             }
-            player.addListener(this);
-
-            Boolean isLoop = jzvd.jzDataSource.looping;
-            if (isLoop) {
-                player.setRepeatMode(Player.REPEAT_MODE_ONE);
-            } else {
-                player.setRepeatMode(Player.REPEAT_MODE_OFF);
-            }
-            player.prepare(videoSource);
-            player.setPlayWhenReady(true);
-            callback = new onBufferingUpdate();
-
-            if (jzvd.textureView != null) {
-                SurfaceTexture surfaceTexture = jzvd.textureView.getSurfaceTexture();
-                if (surfaceTexture != null) {
-                    player.setVideoSurface(new Surface(surfaceTexture));
-                }
-            }
-        });
+        }
 
     }
 
@@ -129,15 +123,10 @@ public class XNMediaExo extends XNMediaInterface implements Player.Listener {
 
     @Override
     public void release() {
-        if (mMediaHandler != null && mMediaHandlerThread != null && player != null) {//不知道有没有妖孽
-            HandlerThread tmpHandlerThread = mMediaHandlerThread;
+        if (player != null) {//不知道有没有妖孽
             ExoPlayer tmpMediaPlayer = player;
             XNMediaInterface.SAVED_SURFACE = null;
-
-            mMediaHandler.post(() -> {
-                tmpMediaPlayer.release();//release就不能放到主线程里，界面会卡顿
-                tmpHandlerThread.quit();
-            });
+            tmpMediaPlayer.release();//release就不能放到主线程里，界面会卡顿
             player = null;
         }
     }
@@ -146,7 +135,9 @@ public class XNMediaExo extends XNMediaInterface implements Player.Listener {
     public long getCurrentPosition() {
         if (player != null)
             return player.getCurrentPosition();
-        else return 0;
+        else {
+            return 0;
+        }
     }
 
     @Override
@@ -154,18 +145,21 @@ public class XNMediaExo extends XNMediaInterface implements Player.Listener {
         if (player != null)
             return player.getDuration();
         else return 0;
+
     }
 
     @Override
     public void setVolume(float leftVolume, float rightVolume) {
         player.setVolume(leftVolume);
         player.setVolume(rightVolume);
+
     }
 
     @Override
     public void setSpeed(float speed) {
         PlaybackParameters playbackParameters = new PlaybackParameters(speed, 1.0F);
         player.setPlaybackParameters(playbackParameters);
+
     }
 
     @Override
@@ -274,17 +268,15 @@ public class XNMediaExo extends XNMediaInterface implements Player.Listener {
     private class onBufferingUpdate implements Runnable {
         @Override
         public void run() {
-            mMediaHandler.post(() -> {
-                if (player != null) {
-                    final int percent = player.getBufferedPercentage();
-                    handler.post(() -> jzvd.setBufferProgress(percent));
-                    if (percent < 100) {
-                        handler.postDelayed(callback, 300);
-                    } else {
-                        handler.removeCallbacks(callback);
-                    }
+            if (player != null) {
+                final int percent = player.getBufferedPercentage();
+                handler.post(() -> jzvd.setBufferProgress(percent));
+                if (percent < 100) {
+                    handler.postDelayed(callback, 300);
+                } else {
+                    handler.removeCallbacks(callback);
                 }
-            });
+            }
 
         }
     }
