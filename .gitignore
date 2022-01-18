@@ -17,3 +17,4 @@ local.properties
 # Project exclude paths
 /lib-player/build/
 /lib-player/build/intermediates/javac/debug/classes/
+/.idea/
